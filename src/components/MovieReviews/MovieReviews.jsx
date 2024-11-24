@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useParams } from 'react-router-dom';  
+import axios from 'axios'
 
-const MovieReviews = ({ movieId }) => {
+const MovieReviews = () => {
+  const { movieId } = useParams();  
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
@@ -16,7 +18,7 @@ const MovieReviews = ({ movieId }) => {
       }
     };
     getReviews();
-  }, [movieId]);
+  }, [movieId]);  
 
   return (
     <div>

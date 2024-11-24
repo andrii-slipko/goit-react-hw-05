@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useParams } from 'react-router-dom';  
+import axios from 'axios'
 
-const MovieCast = ({ movieId }) => {
+const MovieCast = () => {
+  const { movieId } = useParams();  
   const [cast, setCast] = useState([]);
 
   useEffect(() => {
@@ -16,14 +18,16 @@ const MovieCast = ({ movieId }) => {
       }
     };
     getCast();
-  }, [movieId]);
+  }, [movieId]);  
 
   return (
     <div>
       <h2>Cast</h2>
       <ul>
-        {cast.map(actor => (
-          <li key={actor.id}>{actor.name}</li>
+        {cast.map((actor) => (
+          <li key={actor.id}> 
+            <p>{actor.name}</p>
+          </li>
         ))}
       </ul>
     </div>

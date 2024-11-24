@@ -1,19 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, useLocation } from 'react-router-dom'; 
+import { useLocation, useSearchParams } from 'react-router-dom'; 
 import MovieList from '../../components/MovieList/MovieList';
-import styles from './MoviesPage.module.css' 
+import styles from './MoviesPage.module.css'; 
 
 const MoviesPage = () => {
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
-  const [isSearched, setIsSearched] = useState(false); 
+  const [isSearched, setIsSearched] = useState(false);
+  const [error, setError] = useState(null);  
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation(); 
+
+  useEffect(() => {
+    const queryParam = searchParams.get('query') || '';
+    setQuery(queryParam);
+  }, [searchParams]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (query) {
-      setIsSearched(true); 
+    if (query.trim()) {
+      setIsSearched(true);
+      setSearchParams({ query });
       try {
         const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
           params: { 
@@ -22,10 +30,15 @@ const MoviesPage = () => {
             include_adult: false 
           }
         });
-        setMovies(response.data.results); 
+        setMovies(response.data.results);
+        setError(null);  
       } catch (error) {
-        console.error('Error fetching movies:', error);
+        console.error('Помилка при пошуку фільмів:', error);
+        setMovies([]);  
+        setError('Не вдалося знайти фільми. Спробуйте ще раз пізніше.');
       }
+    } else {
+      setMovies([]);  
     }
   };
 
@@ -36,26 +49,19 @@ const MoviesPage = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)} 
-          placeholder="Search for movies"
+          placeholder="Find movie"
           className={styles.input}
         />
         <button className={styles.btn} type="submit">Search</button>
       </form>
 
-      
+      {error && <p style={{ color: 'red' }}>{error}</p>}  
+
       <div>
         {movies.length > 0 ? (
-          <ul>
-            {movies.map((movie) => (
-              <li key={movie.id}>
-                <Link to={`/movies/${movie.id}`} state={{ from: location }}>
-                  {movie.title}  
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <MovieList movies={movies} location={location} /> 
         ) : (
-          isSearched && <p>No movies found</p>  
+          isSearched && !error && <p>Фільми не знайдені</p> 
         )}
       </div>
     </div>
